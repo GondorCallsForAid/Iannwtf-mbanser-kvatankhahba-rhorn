@@ -1,7 +1,7 @@
 # Libraries and Settings
 import os
 import re
-import pytube
+import pytube # python3 -m pip install --upgrade "git+https://github.com/nficano/pytube.git"
 from pytube import YouTube 
 import urllib3
 http = urllib3.PoolManager()
@@ -10,7 +10,7 @@ http = urllib3.PoolManager()
 # Categories from which videos should be fetched
 # more explicit categories tend to be better
 # alternative queries: "games with ambient sound"
-categories = ["black forest", "ocean", "deers", "birds", "train", "city traffic", "diving"]
+categories = ["black forest", "ocean", "deers", "birds", "train", "city traffic", "diving", "waves"]
 
 # Create folders for videos
 path = f"videos/"
@@ -28,11 +28,7 @@ for c in categories:
 videos = {} # {category: video_url}
 for c in categories:
 	qc = "+".join(c.split(" "))
-	# alternate queries
-	# f"stock+footage+of+{qc}+no+music"
-	# f"raw+{qc}+footage"
-	# f"stock+{qc}+footage"
-	query = f"{qc} raw footage"
+	query = f"intitle%3\”{qc}+raw+footage\”"
 	print(f"Downloading {c} videos based on query: {query}")
 	html = http.request("GET", "https://www.youtube.com/results?search_query=" + query)
 	videos[c] = [f"https://www.youtube.com/watch?v={video_id}" for video_id in re.findall(r"watch\?v=(\S{11})", html.data.decode())]
@@ -44,7 +40,7 @@ for c in categories:
 	for url in videos[c]:
 		try:
 			video = YouTube(url)
-			filter_words = ["music", "drone", "lyric"]
+			filter_words = ["music", "drone", "lyric"] # copyright
 			if video.length > max_length or video.views > max_views or any([w in video.description.lower() for w in filter_words]):
 				videos[c].remove(url)
 			else:
